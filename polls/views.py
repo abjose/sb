@@ -4,7 +4,7 @@ from django.urls import reverse
 from django.views import generic
 from django.utils import timezone
 
-from .models import Choice, Question
+from .models import Choice, Question, Topic, Relationship
 
 
 class IndexView(generic.ListView):
@@ -19,6 +19,12 @@ class IndexView(generic.ListView):
         return Question.objects.filter(pub_date__lte=timezone.now()).order_by('-pub_date')[:5]
 
 
+class TopicListView(generic.ListView):
+    paginate_by = 30
+    model = Topic
+    ordering = ["topic_title"]
+
+
 class DetailView(generic.DetailView):
     model = Question
     template_name = 'polls/detail.html'
@@ -30,11 +36,15 @@ class DetailView(generic.DetailView):
         return Question.objects.filter(pub_date__lte=timezone.now())
 
 
+class TopicDetailView(generic.DetailView):
+    model = Topic
+
+
 class ResultsView(generic.DetailView):
     model = Question
     template_name = 'polls/results.html'
 
-    
+
 def vote(request, question_id):
     question = get_object_or_404(Question, pk=question_id)
     try:
