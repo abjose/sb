@@ -4,7 +4,7 @@ from django.urls import reverse
 from django.views import generic
 from django.utils import timezone
 
-from .models import Choice, Question, Topic, Relationship
+from .models import Choice, Question, Topic, Relationship, Resource
 
 
 class IndexView(generic.ListView):
@@ -38,6 +38,35 @@ class DetailView(generic.DetailView):
 
 class TopicDetailView(generic.DetailView):
     model = Topic
+
+    def get_context_data(self, **kwargs):
+        context = super(TopicDetailView, self).get_context_data(**kwargs)
+
+        context['resource_list'] = Resource.objects.filter(topic=self.object.id)
+
+        context['prereq_list'] = Relationship.objects.filter(
+            target_topic=self.object.id
+        ).filter(
+            relation_type=Relationship.RelationType.PREREQ_OF
+        )
+        context['succ_list'] = Relationship.objects.filter(
+            source_topic=self.object.id
+        ).filter(
+            relation_type=Relationship.RelationType.PREREQ_OF
+        )
+
+        context['parent_list'] = Relationship.objects.filter(
+            source_topic=self.object.id
+        ).filter(
+            relation_type=Relationship.RelationType.CHILD_OF
+        )
+        context['child_list'] = Relationship.objects.filter(
+            target_topic=self.object.id
+        ).filter(
+            relation_type=Relationship.RelationType.CHILD_OF
+        )
+
+        return context
 
 
 class ResultsView(generic.DetailView):

@@ -1,2 +1,60 @@
 <h1>{{ object.topic_title }}</h1>
 <!-- <p>{{ object.description }}</p> -->
+
+
+<h3>Learning Resources</h3>
+{% if resource_list %}
+    <ul>
+    {% for resource in resource_list %}
+        <li><a href="{% url 'polls:resource_detail' resource.id %}">{{ resource.resource_title }}</a></li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No learning resources found.</p>
+{% endif %}
+
+
+<h3>Prequisites Topics</h3>
+{% if prereq_list %}
+    <ul>
+    {% for rel in prereq_list %}
+        <li><a href="{% url 'polls:topic_detail' rel.source_topic.id %}">{{ rel.source_topic.topic_title }}</a></li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No prerequisites found.</p>
+{% endif %}
+
+<h3>Successor Topics</h3>
+{% if prereq_list %}
+    <ul>
+    {% for rel in succ_list %}
+        <li><a href="{% url 'polls:topic_detail' rel.target_topic.id %}">{{ rel.target_topic.topic_title }}</a></li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No successors found.</p>
+{% endif %}
+
+
+<h3>Parent Topics</h3>
+{% if parent_list %}
+    <ul>
+    {% for rel in parent_list %}
+        <li><a href="{% url 'polls:topic_detail' rel.target_topic.id %}">{{ rel.target_topic.topic_title }}</a></li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No parents found.</p>
+{% endif %}
+
+<h3>Child Topics</h3>
+{% if child_list %}
+    <ul>
+    {% for rel in child_list %}
+        <li><a href="{% url 'polls:topic_detail' rel.source_topic.id %}">{{ rel.source_topic.topic_title }}</a></li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No children found.</p>
+{% endif %}
