@@ -11,4 +11,5 @@ urlpatterns = [
 
     path('topics/', views.TopicListView.as_view(), name='topics'),
     path('topics/<int:pk>/', views.TopicDetailView.as_view(), name='topic_detail'),
+    path('resources/<int:pk>/', views.ResourceDetailView.as_view(), name='resource_detail'),
 ]

@@ -69,6 +69,10 @@ class TopicDetailView(generic.DetailView):
         return context
 
 
+class ResourceDetailView(generic.DetailView):
+    model = Resource
+
+
 class ResultsView(generic.DetailView):
     model = Question
     template_name = 'polls/results.html'
