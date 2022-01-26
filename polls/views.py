@@ -1,8 +1,9 @@
+from django.db.models import Q
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
-from django.views import generic
 from django.utils import timezone
+from django.views import generic
 
 from .models import Choice, Question, Topic, Relationship, Resource
 
@@ -20,8 +21,8 @@ class IndexView(generic.ListView):
 
 
 class TopicListView(generic.ListView):
-    paginate_by = 30
     model = Topic
+    paginate_by = 30
     ordering = ["topic_title"]
 
 
@@ -71,6 +72,20 @@ class TopicDetailView(generic.DetailView):
 
 class ResourceDetailView(generic.DetailView):
     model = Resource
+
+
+class TopicSearchResultsView(generic.ListView):
+    model = Topic
+    template_name = 'polls/topic_search_results.html'
+    paginate_by = 30
+    ordering = ["topic_title"]
+
+    def get_queryset(self):
+        query = self.request.GET.get('q')
+        object_list = Topic.objects.filter(
+            Q(topic_title__icontains=query) # | Q(state__icontains=query)
+        )
+        return object_list
 
 
 class ResultsView(generic.DetailView):

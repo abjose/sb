@@ -1,6 +1,12 @@
 <!-- {% load static %} -->
 <!-- <link rel="stylesheet" type="text/css" href="{% static 'polls/style.css' %}"> -->
 
+<form action="{% url 'polls:topic_search_results' %}" method="get">
+  <input name="q" type="text" placeholder="Search...">
+</form>
+
+<h1>All Topics</h1>
+
 {% if topic_list %}
     <ul>
     {% for topic in topic_list %}
