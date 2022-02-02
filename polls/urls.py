@@ -14,4 +14,6 @@ urlpatterns = [
     path('topics/<int:pk>/', views.TopicDetailView.as_view(), name='topic_detail'),
 
     path('resources/<int:pk>/', views.ResourceDetailView.as_view(), name='resource_detail'),
+
+    path('goals/<int:pk>/', views.GoalDetailView.as_view(), name='goal_detail'),
 ]

@@ -1,0 +1,12 @@
+<h1>Goal: {{ object.topic_title }}</h1>
+<!-- <p>{{ object.description }}</p> -->
+
+{% if prereqs %}
+    <ul>
+    {% for topic in prereqs %}
+        <li><a href="{% url 'polls:topic_detail' topic.id %}">{{ topic.topic_title }}</a></li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>Couldn't find path.</p>
+{% endif %}

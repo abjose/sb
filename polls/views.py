@@ -70,6 +70,18 @@ class TopicDetailView(generic.DetailView):
         return context
 
 
+class GoalDetailView(generic.DetailView):
+    model = Topic
+    template_name = 'polls/goal_detail.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(GoalDetailView, self).get_context_data(**kwargs)
+        print("Getting prereqs")
+        context['prereqs'] = get_all_prereqs(self.object.id)
+        print(f"Done getting prereqs, found {len(context['prereqs'])}")
+        return context
+
+
 class ResourceDetailView(generic.DetailView):
     model = Resource
 
@@ -110,3 +122,22 @@ def vote(request, question_id):
         # with POST data. This prevents data from being posted twice if a
         # user hits the Back button.
         return HttpResponseRedirect(reverse('polls:results', args=(question.id,)))
+
+
+# Return a list of all prereq topics for the given topic.
+def get_all_prereqs(topic_id):
+    # TODO: use a graph db or in-memory graph or anything other than this.
+    prereq_topics = set()  # what will it use to hash?
+    open_set = set([topic_id])
+    while (len(open_set) > 0):
+        curr_id = open_set.pop()
+        prereq_relations = Relationship.objects.filter(target_topic=curr_id).filter(
+            relation_type=Relationship.RelationType.PREREQ_OF
+        )
+        for rel in prereq_relations:
+            print(f"adding {rel.source_topic.topic_title}")
+            open_set.add(rel.source_topic.id)
+            prereq_topics.add(rel.source_topic)
+
+    # TODO: make sure ordered?
+    return prereq_topics
