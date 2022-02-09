@@ -19,4 +19,6 @@ from django.urls import include, path
 urlpatterns = [
     path('polls/', include('polls.urls')),
     path('admin/', admin.site.urls),
+    # https://docs.djangoproject.com/en/4.0/topics/auth/default/#using-the-views
+    path('accounts/', include('django.contrib.auth.urls')),
 ]

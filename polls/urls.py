@@ -12,8 +12,15 @@ urlpatterns = [
     path('topics/', views.TopicListView.as_view(), name='topics'),
     path('topics/search/', views.TopicSearchResultsView.as_view(), name='topic_search_results'),
     path('topics/<int:pk>/', views.TopicDetailView.as_view(), name='topic_detail'),
+    path('topics/<int:topic_id>/known/', views.mark_known, name='mark_known'),
 
     path('resources/<int:pk>/', views.ResourceDetailView.as_view(), name='resource_detail'),
 
     path('goals/<int:pk>/', views.GoalDetailView.as_view(), name='goal_detail'),
+
+    # easy way to do username instead?
+    path('users/<int:pk>/', views.UserDetailView.as_view(), name='user_detail'),
+
+    # probably should be in different app
+    path("register", views.register_request, name="register")
 ]

@@ -1,0 +1,12 @@
+<h1> User: {{ object.username }}</h1>
+
+<h3>Known Topics</h3>
+{% if known %}
+    <ul>
+    {% for relation in known %}
+        <li><a href="{% url 'polls:topic_detail' relation.target_topic.id %}">{{ relation.target_topic.topic_title }} ({{ relation.id }})</a></li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No known topics found.</p>
+{% endif %}

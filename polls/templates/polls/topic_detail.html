@@ -2,6 +2,14 @@
 <!-- <p>{{ object.description }}</p> -->
 <a href="{% url 'polls:goal_detail' object.id %}">View as Goal</a>
 
+{% if user.is_authenticated %}
+<form name="create_station" method="post" action="{% url 'polls:mark_known' object.id %}">
+      {% csrf_token %}
+      <input type="hidden" name="supporttype" />
+      <input type="submit" value="Mark as Known" />
+  </form>
+{% endif %}
+
 
 <h3>Learning Resources</h3>
 {% if resource_list %}

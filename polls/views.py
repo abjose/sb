@@ -1,6 +1,10 @@
+from django.contrib.auth import login
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.models import User
 from django.db.models import Q
 from django.http import HttpResponseRedirect
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse
 from django.utils import timezone
 from django.views import generic
@@ -105,6 +109,23 @@ class ResultsView(generic.DetailView):
     template_name = 'polls/results.html'
 
 
+# require login?
+class UserDetailView(generic.DetailView):
+    model = User
+    template_name = 'polls/user_detail.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(UserDetailView, self).get_context_data(**kwargs)
+
+        context['known'] = Relationship.objects.filter(
+            user=self.object.id
+        ).filter(
+            relation_type=Relationship.RelationType.KNOWLEDGE_OF
+        )
+
+        return context
+
+
 def vote(request, question_id):
     question = get_object_or_404(Question, pk=question_id)
     try:
@@ -124,6 +145,52 @@ def vote(request, question_id):
         return HttpResponseRedirect(reverse('polls:results', args=(question.id,)))
 
 
+@login_required
+def mark_known(request, topic_id):
+    # MAKE A NEW Relationship
+    # then redirect to... user page? or back to topic
+    # TODO: should use AJAX probably
+    # print(f"topic id: {topic_id}")
+    # print(f"user id: {request.user.id}")
+
+    existing_rel = Relationship.objects.filter(
+        user=request.user.id
+    ).filter(
+        target_topic=topic_id
+    ).filter(
+        relation_type=Relationship.RelationType.KNOWLEDGE_OF
+    )
+
+    if len(existing_rel) == 0:
+        print("Topic not yet marked as known; adding.")
+        topic = get_object_or_404(Topic, pk=topic_id)
+        rel = Relationship(
+            user=request.user,
+            target_topic=topic,
+            relation_type=Relationship.RelationType.KNOWLEDGE_OF)
+        rel.save()
+
+    # return HttpResponseRedirect(reverse('polls:user_detail', args=[request.user.id]))
+    return HttpResponseRedirect(reverse('polls:topic_detail', args=[topic_id]))
+
+    # try:
+    #     selected_choice = question.choice_set.get(pk=request.POST['choice'])
+    # except (KeyError, Choice.DoesNotExist):
+    #     # Redisplay the question voting form.
+    #     return render(request, 'polls/detail.html', {
+    #         'question': question,
+    #         'error_message': "You didn't select a choice.",
+    #     })
+    # else:
+    #     selected_choice.votes += 1
+    #     selected_choice.save()
+    #     # Always return an HttpResponseRedirect after successfully dealing
+    #     # with POST data. This prevents data from being posted twice if a
+    #     # user hits the Back button.
+    #     return HttpResponseRedirect(reverse('polls:results', args=(question.id,)))
+    # redirect to user page instead?
+
+
 # Return a list of all prereq topics for the given topic.
 def get_all_prereqs(topic_id):
     # TODO: use a graph db or in-memory graph or anything other than this.
@@ -141,3 +208,20 @@ def get_all_prereqs(topic_id):
 
     # TODO: make sure ordered?
     return prereq_topics
+
+
+# Probably should be in a different app
+def register_request(request):
+    if request.method == "POST":
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            print("Registration successful!")
+            # messages.success(request, "Registration successful." )
+            # return redirect("main:homepage")
+            return redirect("polls:topics")
+        print("Unsuccessful registration")
+        # messages.error(request, "Unsuccessful registration. Invalid information.")
+    form = UserCreationForm()
+    return render (request=request, template_name="polls/register.html", context={"register_form":form})

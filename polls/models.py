@@ -1,6 +1,7 @@
 import datetime
 
 from django.contrib import admin
+from django.contrib.auth.models import User
 from django.db import models
 from django.utils import timezone
 
@@ -50,16 +51,23 @@ class Topic(models.Model):
 
 # TODO: investigate performance of this vs. ManyToMany version.
 class Relationship(models.Model):
-    source_topic = models.ForeignKey(Topic, related_name="successor_relations", on_delete=models.CASCADE)
+    source_topic = models.ForeignKey(Topic, related_name="successor_relations", null=True, on_delete=models.CASCADE)
     target_topic = models.ForeignKey(Topic, related_name="predecessor_relations", on_delete=models.CASCADE)
+
+    # If this is a 'knowledge' relation (i.e. user U knows topic T) then uses
+    # this field and `target_topic`.
+    # TODO: Could atlernatively have a UserKnowledge model or something.
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
 
     # Should these be backwards?
     class RelationType(models.IntegerChoices):
         CHILD_OF = 1
         PREREQ_OF = 2
+        KNOWLEDGE_OF = 3
     relation_type = models.IntegerField(choices=RelationType.choices)
 
     # one big advantage of explicit Relationship model - can easily have stuff like weights!
+    weight = models.FloatField(default=1)
 
     def __str(self):
         return f"{self.source_topic} -> {self.target_topic}"
@@ -74,3 +82,13 @@ class Resource(models.Model):
 
     def __str__(self):
         return self.resource_title
+
+
+# Do you need explicit goals? goals are just topics, right? could be collections of topics, but then that should be its own topic, probably
+# class Goal(models.Model):
+#     topic = models.ForeignKey(Topic, on_delete=models.CASCADE)
+#     resource_title = models.CharField(max_length=200)
+#     resource_link = models.CharField(max_length=200)
+
+#     def __str__(self):
+#         return self.resource_title
