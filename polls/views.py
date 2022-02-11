@@ -80,8 +80,8 @@ class GoalDetailView(generic.DetailView):
 
     def get_context_data(self, **kwargs):
         context = super(GoalDetailView, self).get_context_data(**kwargs)
-        print("Getting prereqs")
-        context['prereqs'] = get_all_prereqs(self.object.id)
+        print(f"Getting prereqs for user {self.request.user.id}")
+        context['prereqs'] = get_all_prereqs(self.object.id, self.request.user.id)
         print(f"Done getting prereqs, found {len(context['prereqs'])}")
         return context
 
@@ -192,16 +192,27 @@ def mark_known(request, topic_id):
 
 
 # Return a list of all prereq topics for the given topic.
-def get_all_prereqs(topic_id):
+def get_all_prereqs(topic_id, user_id):
     # TODO: use a graph db or in-memory graph or anything other than this.
     prereq_topics = set()  # what will it use to hash?
     open_set = set([topic_id])
-    while (len(open_set) > 0):
+
+    known_topics = set()
+    if user_id:
+        known_rels = Relationship.objects.filter(user=user_id).filter(
+            relation_type=Relationship.RelationType.KNOWLEDGE_OF
+        )
+        known_topics = set([rel.target_topic.id for rel in known_rels])
+
+    while len(open_set) > 0:
         curr_id = open_set.pop()
         prereq_relations = Relationship.objects.filter(target_topic=curr_id).filter(
             relation_type=Relationship.RelationType.PREREQ_OF
         )
         for rel in prereq_relations:
+            if rel.source_topic.id in known_topics:
+                print(f"already know {rel.source_topic.topic_title}")
+                continue
             print(f"adding {rel.source_topic.topic_title}")
             open_set.add(rel.source_topic.id)
             prereq_topics.add(rel.source_topic)
