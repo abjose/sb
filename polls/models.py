@@ -69,7 +69,9 @@ class Relationship(models.Model):
     # one big advantage of explicit Relationship model - can easily have stuff like weights!
     weight = models.FloatField(default=1)
 
-    def __str(self):
+    def __str__(self):
+        if self.user:
+            return f"{self.user} knows {self.target_topic}"
         return f"{self.source_topic} -> {self.target_topic}"
 
 
