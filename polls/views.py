@@ -223,6 +223,7 @@ def get_all_prereqs(topic_id, user_id):
     # TODO: use a graph db or in-memory graph or anything other than this.
     prereq_topics = set()  # what will it use to hash?
     open_set = set([topic_id])
+    closed_set = set()  # seem there are some cycles somewhere?
 
     known_topics = set()
     if user_id:
@@ -233,10 +234,27 @@ def get_all_prereqs(topic_id, user_id):
 
     while len(open_set) > 0:
         curr_id = open_set.pop()
+        if curr_id in closed_set:
+            continue
+        closed_set.add(curr_id)
+
         prereq_relations = Relationship.objects.filter(target_topic=curr_id).filter(
             relation_type=Relationship.RelationType.PREREQ_OF
         )
         for rel in prereq_relations:
+            if rel.source_topic.id in known_topics:
+                print(f"already know {rel.source_topic.topic_title}")
+                continue
+                continue
+            print(f"adding {rel.source_topic.topic_title}")
+            open_set.add(rel.source_topic.id)
+            prereq_topics.add(rel.source_topic)
+
+        # Add children topics too.
+        child_relations = Relationship.objects.filter(target_topic=curr_id).filter(
+            relation_type=Relationship.RelationType.CHILD_OF
+        )
+        for rel in child_relations:
             if rel.source_topic.id in known_topics:
                 print(f"already know {rel.source_topic.topic_title}")
                 continue
