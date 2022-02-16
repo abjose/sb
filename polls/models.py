@@ -54,7 +54,7 @@ class Relationship(models.Model):
     source_topic = models.ForeignKey(Topic, related_name="successor_relations", null=True, on_delete=models.CASCADE)
     target_topic = models.ForeignKey(Topic, related_name="predecessor_relations", on_delete=models.CASCADE)
 
-    # If this is a 'knowledge' relation (i.e. user U knows topic T) then uses
+    # If this is a 'knowledge' or 'goal' relation (i.e. user U knows/has goal of topic T) then uses
     # this field and `target_topic`.
     # TODO: Could atlernatively have a UserKnowledge model or something.
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
@@ -64,6 +64,7 @@ class Relationship(models.Model):
         CHILD_OF = 1
         PREREQ_OF = 2
         KNOWLEDGE_OF = 3
+        GOAL_OF = 4
     relation_type = models.IntegerField(choices=RelationType.choices)
 
     # one big advantage of explicit Relationship model - can easily have stuff like weights!
@@ -71,7 +72,10 @@ class Relationship(models.Model):
 
     def __str__(self):
         if self.user:
-            return f"{self.user} knows {self.target_topic}"
+            if self.relation_type == Relationship.RelationType.KNOWLEDGE_OF:
+                return f"{self.user} knows {self.target_topic}"
+            else:
+                return f"{self.user} has goal of {self.target_topic}"
         return f"{self.source_topic} -> {self.target_topic}"
 
 

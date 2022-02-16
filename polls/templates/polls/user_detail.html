@@ -1,5 +1,19 @@
 <h1> User: {{ object.username }}</h1>
 
+<h3>Goals</h3>
+{% if goals %}
+    <ul>
+    {% for relation in goals %}
+      <li>
+        <a href="{% url 'polls:topic_detail' relation.target_topic.id %}">{{ relation.target_topic.topic_title }} ({{ relation.id }})</a> <br/>
+        <a href="{% url 'polls:goal_detail' relation.target_topic.id %}">View as Goal</a>
+      </li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No goals topics found.</p>
+{% endif %}
+
 <h3>Known Topics</h3>
 {% if known %}
     <ul>

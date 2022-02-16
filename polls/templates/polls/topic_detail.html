@@ -1,13 +1,18 @@
 <h1>{{ object.topic_title }}</h1>
 <!-- <p>{{ object.description }}</p> -->
-<a href="{% url 'polls:goal_detail' object.id %}">View as Goal</a>
 
 {% if user.is_authenticated %}
-<form name="create_station" method="post" action="{% url 'polls:mark_known' object.id %}">
+<form name="mark_known" method="post" action="{% url 'polls:mark_known' object.id %}">
       {% csrf_token %}
       <input type="hidden" name="supporttype" />
       <input type="submit" value="Mark as Known" />
-  </form>
+</form>
+
+<form name="mark_goal" method="post" action="{% url 'polls:mark_goal' object.id %}">
+      {% csrf_token %}
+      <input type="hidden" name="supporttype" />
+      <input type="submit" value="Mark as Goal" />
+</form>
 {% endif %}
 
 

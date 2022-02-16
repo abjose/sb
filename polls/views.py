@@ -117,6 +117,12 @@ class UserDetailView(generic.DetailView):
     def get_context_data(self, **kwargs):
         context = super(UserDetailView, self).get_context_data(**kwargs)
 
+        context['goals'] = Relationship.objects.filter(
+            user=self.object.id
+        ).filter(
+            relation_type=Relationship.RelationType.GOAL_OF
+        )
+
         context['known'] = Relationship.objects.filter(
             user=self.object.id
         ).filter(
@@ -189,6 +195,27 @@ def mark_known(request, topic_id):
     #     # user hits the Back button.
     #     return HttpResponseRedirect(reverse('polls:results', args=(question.id,)))
     # redirect to user page instead?
+
+
+@login_required
+def mark_goal(request, topic_id):
+    existing_rel = Relationship.objects.filter(
+        user=request.user.id
+    ).filter(
+        target_topic=topic_id
+    ).filter(
+        relation_type=Relationship.RelationType.GOAL_OF
+    )
+
+    if len(existing_rel) == 0:
+        topic = get_object_or_404(Topic, pk=topic_id)
+        rel = Relationship(
+            user=request.user,
+            target_topic=topic,
+            relation_type=Relationship.RelationType.GOAL_OF)
+        rel.save()
+
+    return HttpResponseRedirect(reverse('polls:topic_detail', args=[topic_id]))
 
 
 # Return a list of all prereq topics for the given topic.
