@@ -14,6 +14,7 @@ urlpatterns = [
     path('topics/<int:pk>/', views.TopicDetailView.as_view(), name='topic_detail'),
     path('topics/<int:topic_id>/known/', views.mark_known, name='mark_known'),
     path('topics/<int:topic_id>/goal/', views.mark_goal, name='mark_goal'),
+    path('topics/<int:topic_id>/remove_goal/', views.remove_goal, name='remove_goal'),
 
     path('resources/<int:pk>/', views.ResourceDetailView.as_view(), name='resource_detail'),
 

@@ -218,6 +218,22 @@ def mark_goal(request, topic_id):
     return HttpResponseRedirect(reverse('polls:topic_detail', args=[topic_id]))
 
 
+@login_required
+def remove_goal(request, topic_id):
+    existing_rel = Relationship.objects.filter(
+        user=request.user.id
+    ).filter(
+        target_topic=topic_id
+    ).filter(
+        relation_type=Relationship.RelationType.GOAL_OF
+    )
+
+    if len(existing_rel) > 0:
+        existing_rel[0].delete()
+
+    return HttpResponseRedirect(reverse('polls:user_detail', args=[request.user.id]))
+
+
 # Return a list of all prereq topics for the given topic.
 def get_all_prereqs(topic_id, user_id):
     # TODO: use a graph db or in-memory graph or anything other than this.

@@ -6,7 +6,12 @@
     {% for relation in goals %}
       <li>
         <a href="{% url 'polls:topic_detail' relation.target_topic.id %}">{{ relation.target_topic.topic_title }} ({{ relation.id }})</a> <br/>
-        <a href="{% url 'polls:goal_detail' relation.target_topic.id %}">View as Goal</a>
+        <a href="{% url 'polls:goal_detail' relation.target_topic.id %}">View as Goal</a> <br/>
+        <form name="remove_goal" method="post" action="{% url 'polls:remove_goal' relation.target_topic.id %}">
+          {% csrf_token %}
+          <input type="hidden" name="supporttype" />
+          <input type="submit" value="Remove Goal" />
+        </form>
       </li>
     {% endfor %}
     </ul>
