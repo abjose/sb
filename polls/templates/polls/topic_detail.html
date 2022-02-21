@@ -1,7 +1,7 @@
 <h1>{{ object.topic_title }}</h1>
 <!-- <p>{{ object.description }}</p> -->
 
-{% if user.is_authenticated %}
+{% if request.user.is_authenticated %}
 <form name="mark_known" method="post" action="{% url 'polls:mark_known' object.id %}">
       {% csrf_token %}
       <input type="hidden" name="supporttype" />

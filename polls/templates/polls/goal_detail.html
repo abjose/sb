@@ -1,7 +1,7 @@
 <h1>Goal: {{ object.topic_title }}</h1>
 <!-- <p>{{ object.description }}</p> -->
 
-{% if user.is_authenticated %}
+{% if request.user.is_authenticated %}
 Logged in as {{ user.username }}
 {% endif %}
 
