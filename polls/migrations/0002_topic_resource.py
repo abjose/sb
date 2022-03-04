@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
             name='Topic',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('topic_title', models.CharField(max_length=200)),
+                ('title', models.CharField(max_length=200)),
                 ('parent_topics', models.ManyToManyField(related_name='child_topics', to='polls.Topic')),
                 ('prereq_topics', models.ManyToManyField(related_name='postreq_topics', to='polls.Topic')),
             ],

@@ -1,4 +1,4 @@
-<h1>Goal: {{ object.topic_title }}</h1>
+<h1>Goal: {{ object.title }}</h1>
 <!-- <p>{{ object.description }}</p> -->
 
 {% if request.user.is_authenticated %}
@@ -8,7 +8,7 @@ Logged in as {{ user.username }}
 {% if prereqs %}
     <ul>
     {% for topic in prereqs %}
-        <li><a href="{% url 'polls:topic_detail' topic.id %}">{{ topic.topic_title }}</a></li>
+        <li><a href="{% url 'polls:topic_detail' topic.id %}">{{ topic.title }}</a></li>
     {% endfor %}
     </ul>
 {% else %}

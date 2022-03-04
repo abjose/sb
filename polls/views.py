@@ -27,7 +27,7 @@ class IndexView(generic.ListView):
 class TopicListView(generic.ListView):
     model = Topic
     paginate_by = 30
-    ordering = ["topic_title"]
+    ordering = ["title"]
 
 
 class DetailView(generic.DetailView):
@@ -81,7 +81,7 @@ class GoalDetailView(generic.DetailView):
     def get_context_data(self, **kwargs):
         context = super(GoalDetailView, self).get_context_data(**kwargs)
         print(f"Getting prereqs for user {self.request.user.id}")
-        context['prereqs'] = get_all_prereqs(self.object.id, self.request.user.id)
+        context['prereqs'], _ = get_all_prereqs(self.object.id, self.request.user.id)
         print(f"Done getting prereqs, found {len(context['prereqs'])}")
         return context
 
@@ -94,12 +94,12 @@ class TopicSearchResultsView(generic.ListView):
     model = Topic
     template_name = 'polls/topic_search_results.html'
     paginate_by = 30
-    ordering = ["topic_title"]
+    ordering = ["title"]
 
     def get_queryset(self):
         query = self.request.GET.get('q')
         object_list = Topic.objects.filter(
-            Q(topic_title__icontains=query) # | Q(state__icontains=query)
+            Q(title__icontains=query) # | Q(state__icontains=query)
         )
         return object_list
 
@@ -122,6 +122,11 @@ class UserDetailView(generic.DetailView):
         ).filter(
             relation_type=Relationship.RelationType.GOAL_OF
         )
+
+        context['next_steps'] = dict()
+        for goal_rel in context['goals']:
+            goal_topic_id = goal_rel.target_topic.id
+            context['next_steps'][goal_rel.target_topic.title] = get_next_steps(goal_topic_id, self.object.id)
 
         context['known'] = Relationship.objects.filter(
             user=self.object.id
@@ -237,8 +242,9 @@ def remove_goal(request, topic_id):
 # Return a list of all prereq topics for the given topic.
 def get_all_prereqs(topic_id, user_id):
     # TODO: use a graph db or in-memory graph or anything other than this.
-    prereq_topics = set()  # what will it use to hash?
-    open_set = set([topic_id])
+    prereq_topics = set()  # WARNING - uses id to hash, so if not saved won't work.
+    next_steps = set()  # Only the "boundary" of unknown topics.
+    open_set = set([Topic.objects.get(pk=topic_id)])
     closed_set = set()  # seem there are some cycles somewhere?
 
     known_topics = set()
@@ -246,40 +252,53 @@ def get_all_prereqs(topic_id, user_id):
         known_rels = Relationship.objects.filter(user=user_id).filter(
             relation_type=Relationship.RelationType.KNOWLEDGE_OF
         )
-        known_topics = set([rel.target_topic.id for rel in known_rels])
+        known_topics = set([rel.target_topic for rel in known_rels])
+        print("known topics: ", known_topics)
 
     while len(open_set) > 0:
-        curr_id = open_set.pop()
-        if curr_id in closed_set:
+        curr_topic = open_set.pop()
+        if curr_topic in closed_set:
             continue
-        closed_set.add(curr_id)
+        closed_set.add(curr_topic)
 
-        prereq_relations = Relationship.objects.filter(target_topic=curr_id).filter(
+        prereq_relations = Relationship.objects.filter(target_topic=curr_topic).filter(
             relation_type=Relationship.RelationType.PREREQ_OF
         )
+        added_child = False
         for rel in prereq_relations:
-            if rel.source_topic.id in known_topics:
-                print(f"already know {rel.source_topic.topic_title}")
+            if rel.source_topic in known_topics:
+                print(f"already know {rel.source_topic.title}")
                 continue
-                continue
-            print(f"adding {rel.source_topic.topic_title}")
-            open_set.add(rel.source_topic.id)
+            print(f"adding {rel.source_topic.title}")
+            open_set.add(rel.source_topic)
             prereq_topics.add(rel.source_topic)
+            added_child = True
+        if not added_child and curr_topic not in known_topics:
+            # Add (unknown) nodes with no unknown children.
+            print(f"marking {curr_topic.title} as a next_step")
+            next_steps.add(curr_topic)
+            # do for children topics too??
 
         # Add children topics too.
-        child_relations = Relationship.objects.filter(target_topic=curr_id).filter(
+        child_relations = Relationship.objects.filter(target_topic=curr_topic).filter(
             relation_type=Relationship.RelationType.CHILD_OF
         )
         for rel in child_relations:
-            if rel.source_topic.id in known_topics:
-                print(f"already know {rel.source_topic.topic_title}")
+            if rel.source_topic in known_topics:
+                print(f"already know {rel.source_topic.title}")
                 continue
-            print(f"adding {rel.source_topic.topic_title}")
-            open_set.add(rel.source_topic.id)
+            print(f"adding {rel.source_topic.title}")
+            open_set.add(rel.source_topic)
             prereq_topics.add(rel.source_topic)
 
     # TODO: make sure ordered?
-    return prereq_topics
+    return prereq_topics, next_steps
+
+
+def get_next_steps(topic_id, user_id):
+    # TODO: change prereqs function to return something more like a graph instead?
+    _, next_steps = get_all_prereqs(topic_id, user_id)
+    return next_steps
 
 
 # Probably should be in a different app

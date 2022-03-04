@@ -5,7 +5,7 @@ from .models import Topic, Relationship, Resource
 
 class RelationshipAdmin(admin.ModelAdmin):
     list_filter = ['relation_type']
-    search_fields = ['source_topic__topic_title', 'target_topic__topic_title', 'user__username']
+    search_fields = ['source_topic__title', 'target_topic__topic_title', 'user__username']
 
 admin.site.register(Relationship, RelationshipAdmin)
 

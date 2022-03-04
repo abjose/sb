@@ -5,7 +5,7 @@
     <ul>
     {% for relation in goals %}
       <li>
-        <a href="{% url 'polls:topic_detail' relation.target_topic.id %}">{{ relation.target_topic.topic_title }} ({{ relation.id }})</a>
+        <a href="{% url 'polls:topic_detail' relation.target_topic.id %}">{{ relation.target_topic.title }} ({{ relation.id }})</a>
         {% if request.user.is_authenticated %}
           <br/>
           <a href="{% url 'polls:goal_detail' relation.target_topic.id %}">View as Goal</a>
@@ -23,11 +23,29 @@
     <p>No goals topics found.</p>
 {% endif %}
 
+{% if request.user.is_authenticated %}
+<h3>Next Steps</h3>
+{% if next_steps %}
+  <ul>
+  {% for goal_title, next_step_topics in next_steps.items %}
+    <li> Next steps for {{ goal_title }}
+      {% for next_step in next_step_topics %}
+        <br/>
+        <a href="{% url 'polls:topic_detail' next_step.id %}">{{ next_step.title }}</a>
+      {% endfor %}
+    </li>
+  {% endfor %}
+  </ul>
+{% else %}
+    <p>No next steps found.</p>
+{% endif %}
+{% endif %}
+
 <h3>Known Topics</h3>
 {% if known %}
     <ul>
     {% for relation in known %}
-        <li><a href="{% url 'polls:topic_detail' relation.target_topic.id %}">{{ relation.target_topic.topic_title }} ({{ relation.id }})</a></li>
+        <li><a href="{% url 'polls:topic_detail' relation.target_topic.id %}">{{ relation.target_topic.title }} ({{ relation.id }})</a></li>
     {% endfor %}
     </ul>
 {% else %}

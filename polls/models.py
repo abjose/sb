@@ -32,7 +32,7 @@ class Choice(models.Model):
 
 
 class Topic(models.Model):
-    topic_title = models.CharField(max_length=200)  # change to just title?
+    title = models.CharField(max_length=200)
 
 
     # How does this compare to having explicit Edges?
@@ -46,7 +46,7 @@ class Topic(models.Model):
     # ehh, maybe just keep as foreign key - otherwise hard to keep track of topic-specific date for a resource
 
     def __str__(self):
-        return self.topic_title
+        return self.title
 
 
 # TODO: investigate performance of this vs. ManyToMany version.
