@@ -1,3 +1,4 @@
+<title>User: {{ object.username }}</title>
 <h1> User: {{ object.username }}</h1>
 
 <h3>Goals</h3>
@@ -5,7 +6,7 @@
     <ul>
     {% for relation in goals %}
       <li>
-        <a href="{% url 'polls:topic_detail' relation.target_topic.id %}">{{ relation.target_topic.title }} ({{ relation.id }})</a>
+        <a href="{% url 'polls:topic_detail' relation.target_topic.id %}">{{ relation.target_topic.title }}</a>
         {% if request.user.is_authenticated %}
           <br/>
           <a href="{% url 'polls:goal_detail' relation.target_topic.id %}">View as Goal</a>

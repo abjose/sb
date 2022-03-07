@@ -273,11 +273,6 @@ def get_all_prereqs(topic_id, user_id):
             open_set.add(rel.source_topic)
             prereq_topics.add(rel.source_topic)
             added_child = True
-        if not added_child and curr_topic not in known_topics:
-            # Add (unknown) nodes with no unknown children.
-            print(f"marking {curr_topic.title} as a next_step")
-            next_steps.add(curr_topic)
-            # do for children topics too??
 
         # Add children topics too.
         child_relations = Relationship.objects.filter(target_topic=curr_topic).filter(
@@ -290,6 +285,12 @@ def get_all_prereqs(topic_id, user_id):
             print(f"adding {rel.source_topic.title}")
             open_set.add(rel.source_topic)
             prereq_topics.add(rel.source_topic)
+            added_child = True
+
+        if not added_child and curr_topic not in known_topics:
+            # Add (unknown) nodes with no unknown children/predecessors.
+            print(f"marking {curr_topic.title} as a next_step")
+            next_steps.add(curr_topic)
 
     # TODO: make sure ordered?
     return prereq_topics, next_steps
