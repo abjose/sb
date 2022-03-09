@@ -34,7 +34,6 @@ class Choice(models.Model):
 class Topic(models.Model):
     title = models.CharField(max_length=200)
 
-
     # How does this compare to having explicit Edges?
     # parent_topics = models.ManyToManyField(
     #     to='self', symmetrical=False, blank=True)
@@ -83,8 +82,10 @@ class Relationship(models.Model):
 # Use Relationship instead?
 class Resource(models.Model):
     topic = models.ForeignKey(Topic, on_delete=models.CASCADE)
-    resource_title = models.CharField(max_length=200)
-    resource_link = models.CharField(max_length=200)
+
+    title = models.CharField(max_length=200)
+    link = models.CharField(max_length=200)
+    votes = models.IntegerField(default=0)
 
     def __str__(self):
         return self.resource_title
