@@ -42,7 +42,7 @@
 {% endif %}
 
 <h3>Successor Topics</h3>
-{% if prereq_list %}
+{% if succ_list %}
     <ul>
     {% for rel in succ_list %}
         <li><a href="{% url 'polls:topic_detail' rel.target_topic.id %}">{{ rel.target_topic.title }}</a></li>
