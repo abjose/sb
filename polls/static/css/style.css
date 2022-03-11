@@ -1,0 +1,9 @@
+table {
+  border-collapse: collapse;
+}
+tr {
+    border-bottom: 2px solid grey;
+}
+tr:hover {
+    background-color: #D6EEEE;
+}

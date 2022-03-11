@@ -1,3 +1,6 @@
+{% load static %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}"/>
+
 <title>Topic: {{ object.title }}</title>
 
 <h1>{{ object.title }}</h1>
@@ -16,19 +19,6 @@
       <input type="submit" value="Mark as Goal" />
 </form>
 {% endif %}
-
-
-<h3>Learning Resources</h3>
-{% if resource_list %}
-    <ul>
-    {% for resource in resource_list %}
-        <li><a href="{% url 'polls:resource_detail' resource.id %}">{{ resource.resource_title }}</a></li>
-    {% endfor %}
-    </ul>
-{% else %}
-    <p>No learning resources found.</p>
-{% endif %}
-
 
 <h3>Prequisites Topics</h3>
 {% if prereq_list %}
@@ -73,4 +63,25 @@
     </ul>
 {% else %}
     <p>No children found.</p>
+{% endif %}
+
+<h3>Learning Resources</h3>
+{% if resource_list %}
+    <table class="resources">
+    <tr>
+      <th>Votes</th>
+      <th>Title</th>
+      <th>Author</th>
+    </tr>
+    {% for resource in resource_list %}
+      <tr>
+        <td>{{ resource.votes }}</td>
+        <!-- <td><a href="{% url 'polls:resource_detail' resource.id %}">{{ resource.title }}</a></td> -->
+        <td><a title="{{ resource.title }}" href="{{ resource.link }}">{{ resource.title|slice:"0:30" }}...</a></td>
+        <td>{{ resource.author }}</td>
+      </tr>
+    {% endfor %}
+    </table>
+{% else %}
+    <p>No learning resources found.</p>
 {% endif %}

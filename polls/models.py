@@ -84,11 +84,12 @@ class Resource(models.Model):
     topic = models.ForeignKey(Topic, on_delete=models.CASCADE)
 
     title = models.CharField(max_length=200)
+    author = models.CharField(max_length=200)
     link = models.CharField(max_length=200)
     votes = models.IntegerField(default=0)
 
     def __str__(self):
-        return self.resource_title
+        return self.title
 
 
 # Do you need explicit goals? goals are just topics, right? could be collections of topics, but then that should be its own topic, probably
