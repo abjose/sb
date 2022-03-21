@@ -72,6 +72,9 @@
       <th>Votes</th>
       <th>Title</th>
       <th>Author</th>
+      {% if request.user.is_authenticated %}
+        <th>Vote</th>
+      {% endif %}
     </tr>
     {% for resource in resource_list %}
       <tr>
@@ -79,6 +82,13 @@
         <!-- <td><a href="{% url 'polls:resource_detail' resource.id %}">{{ resource.title }}</a></td> -->
         <td><a title="{{ resource.title }}" href="{{ resource.link }}">{{ resource.title|slice:"0:30" }}...</a></td>
         <td>{{ resource.author }}</td>
+        {% if request.user.is_authenticated %}
+          <td><form name="vote" method="post" action="{% url 'polls:vote_for_resource' resource.id %}">
+            {% csrf_token %}
+            <input type="hidden" name="supporttype" />
+            <input type="submit" value="+" />
+          </form></td>
+        {% endif %}
       </tr>
     {% endfor %}
     </table>

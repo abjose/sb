@@ -239,6 +239,14 @@ def remove_goal(request, topic_id):
     return HttpResponseRedirect(reverse('polls:user_detail', args=[request.user.id]))
 
 
+@login_required
+def vote_for_resource(request, resource_id):
+    res = Resource.objects.get(pk=resource_id)
+    res.votes += 1
+    res.save()
+    return HttpResponseRedirect(reverse('polls:topic_detail', args=[res.topic.id]))
+
+
 # Return a list of all prereq topics for the given topic.
 def get_all_prereqs(topic_id, user_id):
     # TODO: use a graph db or in-memory graph or anything other than this.
