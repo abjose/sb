@@ -69,6 +69,8 @@ class Relationship(models.Model):
     # one big advantage of explicit Relationship model - can easily have stuff like weights!
     weight = models.FloatField(default=1)
 
+    # maybe nice to have a "reason" field? particularly for prereqs
+
     def __str__(self):
         if self.user:
             if self.relation_type == Relationship.RelationType.KNOWLEDGE_OF:

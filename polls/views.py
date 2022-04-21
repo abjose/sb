@@ -9,19 +9,21 @@ from django.urls import reverse
 from django.utils import timezone
 from django.views import generic
 
+from random import choice
+
 from .models import Choice, Question, Topic, Relationship, Resource
 
 
 class IndexView(generic.ListView):
     template_name = 'polls/index.html'
-    context_object_name = 'latest_question_list'
+    model = Topic  # TODO: get rid of this
 
-    def get_queryset(self):
-        """
-        Return the last five published questions (not including those set to be
-        published in the future).
-        """
-        return Question.objects.filter(pub_date__lte=timezone.now()).order_by('-pub_date')[:5]
+    def get_context_data(self, **kwargs):
+        context = super(IndexView, self).get_context_data(**kwargs)
+
+        context['random_topic'] = choice(Topic.objects.all())
+
+        return context
 
 
 class TopicListView(generic.ListView):
