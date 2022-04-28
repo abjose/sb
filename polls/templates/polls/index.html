@@ -4,6 +4,8 @@
 
 <h1>SkillBuilder: Home</h1>
 
+<a href="{% url 'polls:topics' %}">Go to list of all topics</a>
+
 {% if request.user.is_authenticated %}
   <p>Welcome, {{ request.user.username }}!</p>
 {% endif %}
