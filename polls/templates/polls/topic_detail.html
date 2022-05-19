@@ -20,6 +20,8 @@
 </form>
 {% endif %}
 
+<p><a href="{% url 'polls:edit_topic' object.id %}">Edit topic</a></p>
+
 <h3>Prequisites Topics</h3>
 {% if prereq_list %}
     <ul>

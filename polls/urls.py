@@ -11,7 +11,9 @@ urlpatterns = [
 
     path('topics/', views.TopicListView.as_view(), name='topics'),
     path('topics/search/', views.TopicSearchResultsView.as_view(), name='topic_search_results'),
+    # path('topics/add/', views.add_topic, name='add_topic'),
     path('topics/<int:pk>/', views.TopicDetailView.as_view(), name='topic_detail'),
+    path('topics/<int:topic_id>/edit/', views.edit_topic, name='edit_topic'),
     path('topics/<int:topic_id>/known/', views.mark_known, name='mark_known'),
     path('topics/<int:topic_id>/goal/', views.mark_goal, name='mark_goal'),
     path('topics/<int:topic_id>/remove_goal/', views.remove_goal, name='remove_goal'),

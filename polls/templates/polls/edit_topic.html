@@ -1,0 +1,9 @@
+<form action="{% url 'polls:topic_detail' object.id %}" method="post">
+    {% csrf_token %}
+    {{ form }}
+    
+    <table>
+      {{ rel_forms }}
+    </table>
+    <input type="submit" value="Submit">
+</form>

@@ -11,6 +11,7 @@ from django.views import generic
 
 from random import choice
 
+from .forms import TopicForm, RelationshipFormSet
 from .models import Choice, Question, Topic, Relationship, Resource
 
 
@@ -327,3 +328,44 @@ def register_request(request):
         # messages.error(request, "Unsuccessful registration. Invalid information.")
     form = UserCreationForm()
     return render (request=request, template_name="polls/register.html", context={"register_form":form})
+
+
+def edit_topic(request, topic_id=None):
+    topic = Topic.objects.get(pk=topic_id)
+
+    relationships = list(Relationship.objects.filter(source_topic=topic_id).values())
+    relationships.extend(Relationship.objects.filter(target_topic=topic_id).values())
+
+    for rel in relationships:
+        # can just get if don't do values()?
+        source_topic = Topic.objects.get(pk=rel['source_topic_id'])
+        target_topic = Topic.objects.get(pk=rel['target_topic_id'])
+        rel['source_topic'] = source_topic
+        rel['target_topic'] = target_topic
+
+    print(f"found {len(relationships)} rels")
+    print(relationships)
+
+    rel_forms = RelationshipFormSet(initial=relationships)
+    # print(rel_forms.as_table())
+    
+    # if not request.user:
+    #     form = ChoiceResponseForm()
+    #     return render(request, 'polls/question_detail.html', {'object': question, 'form': form})
+
+    # if this is a POST request we need to process the form data
+    if request.method == 'POST':
+        # create a form instance and populate it with data from the request:
+        # form = ChoiceResponseForm(request.POST, instance=choice)  # will this overwrite new values?
+        # # check whether it's valid:
+        # if form.is_valid():
+        #     # process the data in form.cleaned_data as required
+        #     form.save()
+        #     return HttpResponseRedirect('/polls/questions/')
+        pass
+
+    # if a GET (or any other method) we'll create a blank form
+    else:
+        form = TopicForm(instance=topic)
+
+    return render(request, 'polls/edit_topic.html', {'object': topic, 'form': form, 'rel_forms': rel_forms})
