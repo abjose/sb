@@ -4,14 +4,14 @@
 <h3>Goals</h3>
 {% if goals %}
     <ul>
-    {% for relation in goals %}
+    {% for goal in goals %}
       <li>
-        <a href="{% url 'polls:topic_detail' relation.target.id %}">{{ relation.target.title }}</a>
+        <a href="{% url 'polls:topic_detail' goal.topic.id %}">{{ goal.topic.title }}</a>
         {% if request.user.is_authenticated %}
           <br/>
-          <a href="{% url 'polls:goal_detail' relation.target.id %}">View as Goal</a>
+          <a href="{% url 'polls:goal_detail' goal.topic.id %}">View as Goal</a>
           <br/>
-          <form name="remove_goal" method="post" action="{% url 'polls:remove_goal' relation.target.id %}">
+          <form name="remove_goal" method="post" action="{% url 'polls:remove_goal' goal.topic.id %}">
             {% csrf_token %}
             <input type="hidden" name="supporttype" />
             <input type="submit" value="Remove Goal" />
@@ -45,8 +45,8 @@
 <h3>Known Topics</h3>
 {% if known %}
     <ul>
-    {% for relation in known %}
-        <li><a href="{% url 'polls:topic_detail' relation.target.id %}">{{ relation.target.title }} ({{ relation.id }})</a></li>
+    {% for k in known %}
+        <li><a href="{% url 'polls:topic_detail' k.topic.id %}">{{ k.topic.title }}</a></li>
     {% endfor %}
     </ul>
 {% else %}

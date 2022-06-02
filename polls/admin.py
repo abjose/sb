@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Topic, TopicRelationship, TopicRelVote, Resource
+from .models import Topic, TopicRelationship, TopicRelVote, Resource, UserGoal, UserKnowledge
 
 
 class TopicRelationshipAdmin(admin.ModelAdmin):
@@ -13,3 +13,5 @@ admin.site.register(TopicRelationship, TopicRelationshipAdmin)
 admin.site.register(Topic)
 admin.site.register(Resource)
 admin.site.register(TopicRelVote)
+admin.site.register(UserGoal)
+admin.site.register(UserKnowledge)

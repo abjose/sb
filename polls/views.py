@@ -12,7 +12,7 @@ from django.views import generic
 from random import choice
 
 from .forms import TopicForm, TopicRelationshipFormSet
-from .models import Choice, Question, Topic, TopicRelationship, Resource
+from .models import Choice, Question, Topic, TopicRelationship, Resource, UserGoal, UserKnowledge
 
 
 class IndexView(generic.ListView):
@@ -120,22 +120,13 @@ class UserDetailView(generic.DetailView):
     def get_context_data(self, **kwargs):
         context = super(UserDetailView, self).get_context_data(**kwargs)
 
-        context['goals'] = TopicRelationship.objects.filter(
-            user=self.object.id
-        ).filter(
-            relation_type=TopicRelationship.RelationType.GOAL_OF
-        )
+        context['goals'] = UserGoal.objects.filter(user=self.object.id)
+        context['known'] = UserKnowledge.objects.filter(user=self.object.id)
 
         context['next_steps'] = dict()
-        for goal_rel in context['goals']:
-            goal_topic_id = goal_rel.target.id
-            context['next_steps'][goal_rel.target.title] = get_next_steps(goal_topic_id, self.object.id)
-
-        context['known'] = TopicRelationship.objects.filter(
-            user=self.object.id
-        ).filter(
-            relation_type=TopicRelationship.RelationType.KNOWLEDGE_OF
-        )
+        for goal in context['goals']:
+            goal_topic_id = goal.topic.id
+            context['next_steps'][goal.topic.title] = get_next_steps(goal_topic_id, self.object.id)
 
         return context
 
@@ -167,22 +158,19 @@ def mark_known(request, topic_id):
     # print(f"topic id: {topic_id}")
     # print(f"user id: {request.user.id}")
 
-    existing_rel = TopicRelationship.objects.filter(
+    existing = UserKnowledge.objects.filter(
         user=request.user.id
     ).filter(
-        target=topic_id
-    ).filter(
-        relation_type=TopicRelationship.RelationType.KNOWLEDGE_OF
+        topic=topic_id
     )
 
-    if len(existing_rel) == 0:
+    if len(existing) == 0:
         print("Topic not yet marked as known; adding.")
         topic = get_object_or_404(Topic, pk=topic_id)
-        rel = TopicRelationship(
+        known = UserKnowledge(
             user=request.user,
-            target=topic,
-            relation_type=TopicRelationship.RelationType.KNOWLEDGE_OF)
-        rel.save()
+            topic=topic)
+        known.save()
 
     # return HttpResponseRedirect(reverse('polls:user_detail', args=[request.user.id]))
     return HttpResponseRedirect(reverse('polls:topic_detail', args=[topic_id]))
@@ -207,37 +195,32 @@ def mark_known(request, topic_id):
 
 @login_required
 def mark_goal(request, topic_id):
-    existing_rel = TopicRelationship.objects.filter(
+    existing = UserGoal.objects.filter(
         user=request.user.id
     ).filter(
-        target=topic_id
-    ).filter(
-        relation_type=TopicRelationship.RelationType.GOAL_OF
+        topic=topic_id
     )
 
-    if len(existing_rel) == 0:
+    if len(existing) == 0:
         topic = get_object_or_404(Topic, pk=topic_id)
-        rel = TopicRelationship(
+        goal = UserGoal(
             user=request.user,
-            target=topic,
-            relation_type=TopicRelationship.RelationType.GOAL_OF)
-        rel.save()
+            topic=topic)
+        goal.save()
 
     return HttpResponseRedirect(reverse('polls:topic_detail', args=[topic_id]))
 
 
 @login_required
 def remove_goal(request, topic_id):
-    existing_rel = TopicRelationship.objects.filter(
+    existing = UserGoal.objects.filter(
         user=request.user.id
     ).filter(
         target=topic_id
-    ).filter(
-        relation_type=TopicRelationship.RelationType.GOAL_OF
     )
 
-    if len(existing_rel) > 0:
-        existing_rel[0].delete()
+    if len(existing) > 0:
+        existing[0].delete()
 
     return HttpResponseRedirect(reverse('polls:user_detail', args=[request.user.id]))
 
@@ -260,10 +243,8 @@ def get_all_prereqs(topic_id, user_id):
 
     known_topics = set()
     if user_id:
-        known_rels = TopicRelationship.objects.filter(user=user_id).filter(
-            relation_type=TopicRelationship.RelationType.KNOWLEDGE_OF
-        )
-        known_topics = set([rel.target for rel in known_rels])
+        known = UserKnowledge.objects.filter(user=user_id)
+        known_topics = set([k.topic for k in known])
         print("known topics: ", known_topics)
 
     while len(open_set) > 0:
@@ -348,7 +329,7 @@ def edit_topic(request, topic_id=None):
 
     rel_forms = TopicRelationshipFormSet(initial=relationships)
     # print(rel_forms.as_table())
-    
+
     # if not request.user:
     #     form = ChoiceResponseForm()
     #     return render(request, 'polls/question_detail.html', {'object': question, 'form': form})
