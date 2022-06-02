@@ -26,7 +26,7 @@
 {% if prereq_list %}
     <ul>
     {% for rel in prereq_list %}
-        <li><a href="{% url 'polls:topic_detail' rel.source_topic.id %}">{{ rel.source_topic.title }}</a></li>
+        <li><a href="{% url 'polls:topic_detail' rel.source.id %}">{{ rel.source.title }}</a></li>
     {% endfor %}
     </ul>
 {% else %}
@@ -37,7 +37,7 @@
 {% if succ_list %}
     <ul>
     {% for rel in succ_list %}
-        <li><a href="{% url 'polls:topic_detail' rel.target_topic.id %}">{{ rel.target_topic.title }}</a></li>
+        <li><a href="{% url 'polls:topic_detail' rel.target.id %}">{{ rel.target.title }}</a></li>
     {% endfor %}
     </ul>
 {% else %}
@@ -49,7 +49,7 @@
 {% if parent_list %}
     <ul>
     {% for rel in parent_list %}
-        <li><a href="{% url 'polls:topic_detail' rel.target_topic.id %}">{{ rel.target_topic.title }}</a></li>
+        <li><a href="{% url 'polls:topic_detail' rel.target.id %}">{{ rel.target.title }}</a></li>
     {% endfor %}
     </ul>
 {% else %}
@@ -60,7 +60,7 @@
 {% if child_list %}
     <ul>
     {% for rel in child_list %}
-        <li><a href="{% url 'polls:topic_detail' rel.source_topic.id %}">{{ rel.source_topic.title }}</a></li>
+        <li><a href="{% url 'polls:topic_detail' rel.source.id %}">{{ rel.source.title }}</a></li>
     {% endfor %}
     </ul>
 {% else %}

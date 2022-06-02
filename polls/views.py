@@ -11,8 +11,8 @@ from django.views import generic
 
 from random import choice
 
-from .forms import TopicForm, RelationshipFormSet
-from .models import Choice, Question, Topic, Relationship, Resource
+from .forms import TopicForm, TopicRelationshipFormSet
+from .models import Choice, Question, Topic, TopicRelationship, Resource
 
 
 class IndexView(generic.ListView):
@@ -52,26 +52,26 @@ class TopicDetailView(generic.DetailView):
 
         context['resource_list'] = Resource.objects.filter(topic=self.object.id)
 
-        context['prereq_list'] = Relationship.objects.filter(
-            target_topic=self.object.id
+        context['prereq_list'] = TopicRelationship.objects.filter(
+            target=self.object.id
         ).filter(
-            relation_type=Relationship.RelationType.PREREQ_OF
+            relation_type=TopicRelationship.RelationType.PREREQ_OF
         )
-        context['succ_list'] = Relationship.objects.filter(
-            source_topic=self.object.id
+        context['succ_list'] = TopicRelationship.objects.filter(
+            source=self.object.id
         ).filter(
-            relation_type=Relationship.RelationType.PREREQ_OF
+            relation_type=TopicRelationship.RelationType.PREREQ_OF
         )
 
-        context['parent_list'] = Relationship.objects.filter(
-            source_topic=self.object.id
+        context['parent_list'] = TopicRelationship.objects.filter(
+            source=self.object.id
         ).filter(
-            relation_type=Relationship.RelationType.CHILD_OF
+            relation_type=TopicRelationship.RelationType.CHILD_OF
         )
-        context['child_list'] = Relationship.objects.filter(
-            target_topic=self.object.id
+        context['child_list'] = TopicRelationship.objects.filter(
+            target=self.object.id
         ).filter(
-            relation_type=Relationship.RelationType.CHILD_OF
+            relation_type=TopicRelationship.RelationType.CHILD_OF
         )
 
         return context
@@ -120,21 +120,21 @@ class UserDetailView(generic.DetailView):
     def get_context_data(self, **kwargs):
         context = super(UserDetailView, self).get_context_data(**kwargs)
 
-        context['goals'] = Relationship.objects.filter(
+        context['goals'] = TopicRelationship.objects.filter(
             user=self.object.id
         ).filter(
-            relation_type=Relationship.RelationType.GOAL_OF
+            relation_type=TopicRelationship.RelationType.GOAL_OF
         )
 
         context['next_steps'] = dict()
         for goal_rel in context['goals']:
-            goal_topic_id = goal_rel.target_topic.id
-            context['next_steps'][goal_rel.target_topic.title] = get_next_steps(goal_topic_id, self.object.id)
+            goal_topic_id = goal_rel.target.id
+            context['next_steps'][goal_rel.target.title] = get_next_steps(goal_topic_id, self.object.id)
 
-        context['known'] = Relationship.objects.filter(
+        context['known'] = TopicRelationship.objects.filter(
             user=self.object.id
         ).filter(
-            relation_type=Relationship.RelationType.KNOWLEDGE_OF
+            relation_type=TopicRelationship.RelationType.KNOWLEDGE_OF
         )
 
         return context
@@ -161,27 +161,27 @@ def vote(request, question_id):
 
 @login_required
 def mark_known(request, topic_id):
-    # MAKE A NEW Relationship
+    # MAKE A NEW TopicRelationship
     # then redirect to... user page? or back to topic
     # TODO: should use AJAX probably
     # print(f"topic id: {topic_id}")
     # print(f"user id: {request.user.id}")
 
-    existing_rel = Relationship.objects.filter(
+    existing_rel = TopicRelationship.objects.filter(
         user=request.user.id
     ).filter(
-        target_topic=topic_id
+        target=topic_id
     ).filter(
-        relation_type=Relationship.RelationType.KNOWLEDGE_OF
+        relation_type=TopicRelationship.RelationType.KNOWLEDGE_OF
     )
 
     if len(existing_rel) == 0:
         print("Topic not yet marked as known; adding.")
         topic = get_object_or_404(Topic, pk=topic_id)
-        rel = Relationship(
+        rel = TopicRelationship(
             user=request.user,
-            target_topic=topic,
-            relation_type=Relationship.RelationType.KNOWLEDGE_OF)
+            target=topic,
+            relation_type=TopicRelationship.RelationType.KNOWLEDGE_OF)
         rel.save()
 
     # return HttpResponseRedirect(reverse('polls:user_detail', args=[request.user.id]))
@@ -207,20 +207,20 @@ def mark_known(request, topic_id):
 
 @login_required
 def mark_goal(request, topic_id):
-    existing_rel = Relationship.objects.filter(
+    existing_rel = TopicRelationship.objects.filter(
         user=request.user.id
     ).filter(
-        target_topic=topic_id
+        target=topic_id
     ).filter(
-        relation_type=Relationship.RelationType.GOAL_OF
+        relation_type=TopicRelationship.RelationType.GOAL_OF
     )
 
     if len(existing_rel) == 0:
         topic = get_object_or_404(Topic, pk=topic_id)
-        rel = Relationship(
+        rel = TopicRelationship(
             user=request.user,
-            target_topic=topic,
-            relation_type=Relationship.RelationType.GOAL_OF)
+            target=topic,
+            relation_type=TopicRelationship.RelationType.GOAL_OF)
         rel.save()
 
     return HttpResponseRedirect(reverse('polls:topic_detail', args=[topic_id]))
@@ -228,12 +228,12 @@ def mark_goal(request, topic_id):
 
 @login_required
 def remove_goal(request, topic_id):
-    existing_rel = Relationship.objects.filter(
+    existing_rel = TopicRelationship.objects.filter(
         user=request.user.id
     ).filter(
-        target_topic=topic_id
+        target=topic_id
     ).filter(
-        relation_type=Relationship.RelationType.GOAL_OF
+        relation_type=TopicRelationship.RelationType.GOAL_OF
     )
 
     if len(existing_rel) > 0:
@@ -260,10 +260,10 @@ def get_all_prereqs(topic_id, user_id):
 
     known_topics = set()
     if user_id:
-        known_rels = Relationship.objects.filter(user=user_id).filter(
-            relation_type=Relationship.RelationType.KNOWLEDGE_OF
+        known_rels = TopicRelationship.objects.filter(user=user_id).filter(
+            relation_type=TopicRelationship.RelationType.KNOWLEDGE_OF
         )
-        known_topics = set([rel.target_topic for rel in known_rels])
+        known_topics = set([rel.target for rel in known_rels])
         print("known topics: ", known_topics)
 
     while len(open_set) > 0:
@@ -272,30 +272,30 @@ def get_all_prereqs(topic_id, user_id):
             continue
         closed_set.add(curr_topic)
 
-        prereq_relations = Relationship.objects.filter(target_topic=curr_topic).filter(
-            relation_type=Relationship.RelationType.PREREQ_OF
+        prereq_relations = TopicRelationship.objects.filter(target=curr_topic).filter(
+            relation_type=TopicRelationship.RelationType.PREREQ_OF
         )
         added_child = False
         for rel in prereq_relations:
-            if rel.source_topic in known_topics:
-                print(f"already know {rel.source_topic.title}")
+            if rel.source in known_topics:
+                print(f"already know {rel.source.title}")
                 continue
-            print(f"adding {rel.source_topic.title}")
-            open_set.add(rel.source_topic)
-            prereq_topics.add(rel.source_topic)
+            print(f"adding {rel.source.title}")
+            open_set.add(rel.source)
+            prereq_topics.add(rel.source)
             added_child = True
 
         # Add children topics too.
-        child_relations = Relationship.objects.filter(target_topic=curr_topic).filter(
-            relation_type=Relationship.RelationType.CHILD_OF
+        child_relations = TopicRelationship.objects.filter(target=curr_topic).filter(
+            relation_type=TopicRelationship.RelationType.CHILD_OF
         )
         for rel in child_relations:
-            if rel.source_topic in known_topics:
-                print(f"already know {rel.source_topic.title}")
+            if rel.source in known_topics:
+                print(f"already know {rel.source.title}")
                 continue
-            print(f"adding {rel.source_topic.title}")
-            open_set.add(rel.source_topic)
-            prereq_topics.add(rel.source_topic)
+            print(f"adding {rel.source.title}")
+            open_set.add(rel.source)
+            prereq_topics.add(rel.source)
             added_child = True
 
         if not added_child and curr_topic not in known_topics:
@@ -333,20 +333,20 @@ def register_request(request):
 def edit_topic(request, topic_id=None):
     topic = Topic.objects.get(pk=topic_id)
 
-    relationships = list(Relationship.objects.filter(source_topic=topic_id).values())
-    relationships.extend(Relationship.objects.filter(target_topic=topic_id).values())
+    relationships = list(TopicRelationship.objects.filter(source=topic_id).values())
+    relationships.extend(TopicRelationship.objects.filter(target=topic_id).values())
 
     for rel in relationships:
         # can just get if don't do values()?
-        source_topic = Topic.objects.get(pk=rel['source_topic_id'])
-        target_topic = Topic.objects.get(pk=rel['target_topic_id'])
-        rel['source_topic'] = source_topic
-        rel['target_topic'] = target_topic
+        source = Topic.objects.get(pk=rel['source_id'])
+        target = Topic.objects.get(pk=rel['target_id'])
+        rel['source'] = source
+        rel['target'] = target
 
     print(f"found {len(relationships)} rels")
     print(relationships)
 
-    rel_forms = RelationshipFormSet(initial=relationships)
+    rel_forms = TopicRelationshipFormSet(initial=relationships)
     # print(rel_forms.as_table())
     
     # if not request.user:

@@ -49,35 +49,56 @@ class Topic(models.Model):
 
 
 # TODO: investigate performance of this vs. ManyToMany version.
-class Relationship(models.Model):
-    source_topic = models.ForeignKey(Topic, related_name="successor_relations", null=True, on_delete=models.CASCADE)
-    target_topic = models.ForeignKey(Topic, related_name="predecessor_relations", on_delete=models.CASCADE)
-
-    # If this is a 'knowledge' or 'goal' relation (i.e. user U knows/has goal of topic T) then uses
-    # this field and `target_topic`.
-    # TODO: Could atlernatively have a UserKnowledge model or something.
-    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+class TopicRelationship(models.Model):
+    source = models.ForeignKey(Topic, on_delete=models.CASCADE, related_name="source_topic")
+    target = models.ForeignKey(Topic, on_delete=models.CASCADE, related_name="target_topic")
 
     # Should these be backwards?
     class RelationType(models.IntegerChoices):
         CHILD_OF = 1
         PREREQ_OF = 2
-        KNOWLEDGE_OF = 3
-        GOAL_OF = 4
     relation_type = models.IntegerField(choices=RelationType.choices)
 
-    # one big advantage of explicit Relationship model - can easily have stuff like weights!
+    # Created by processing TopicRelVotes.
     weight = models.FloatField(default=1)
 
-    # maybe nice to have a "reason" field? particularly for prereqs
+    def __str__(self):
+        return f"{self.source} -> {self.target}"
+
+
+# should point to topicrel? or no
+class TopicRelVote(models.Model):
+    source = models.ForeignKey(Topic, on_delete=models.CASCADE)
+    target = models.ForeignKey(Topic, on_delete=models.CASCADE)
+    relation_type = models.IntegerField(choices=TopicRelationship.RelationType.choices)
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    source = models.CharField(max_length=200)
+    reason = models.TextField()
+
+    # some possible vote sources
+    # - user votes
+    # - references to textbooks / trustworthy sources
+    # - also optionally a text description of why
 
     def __str__(self):
-        if self.user:
-            if self.relation_type == Relationship.RelationType.KNOWLEDGE_OF:
-                return f"{self.user} knows {self.target_topic}"
-            else:
-                return f"{self.user} has goal of {self.target_topic}"
-        return f"{self.source_topic} -> {self.target_topic}"
+        return f"vote for {self.source} -> {self.target}"
+
+
+class UserGoal(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    topic = models.ForeignKey(Topic, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.user} has goal of {self.topic}"
+
+
+class UserKnowledge(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    topic = models.ForeignKey(Topic, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.user} knows {self.target}"
 
 
 # Want to be able to reference many topics?
