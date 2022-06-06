@@ -11,8 +11,8 @@ from django.views import generic
 
 from random import choice
 
-from .forms import TopicForm, TopicRelationshipFormSet
-from .models import Topic, TopicRelationship, Resource, UserGoal, UserKnowledge
+from .forms import TopicForm, TopicRelationFormSet
+from .models import Topic, TopicRelation, Resource, UserGoal, UserKnowledge
 
 
 class IndexView(generic.ListView):
@@ -41,26 +41,26 @@ class TopicDetailView(generic.DetailView):
 
         context['resource_list'] = Resource.objects.filter(topic=self.object.id)
 
-        context['prereq_list'] = TopicRelationship.objects.filter(
+        context['prereq_list'] = TopicRelation.objects.filter(
             target=self.object.id
         ).filter(
-            relation_type=TopicRelationship.RelationType.PREREQ_OF
+            relation_type=TopicRelation.RelationType.PREREQ_OF
         )
-        context['succ_list'] = TopicRelationship.objects.filter(
+        context['succ_list'] = TopicRelation.objects.filter(
             source=self.object.id
         ).filter(
-            relation_type=TopicRelationship.RelationType.PREREQ_OF
+            relation_type=TopicRelation.RelationType.PREREQ_OF
         )
 
-        context['parent_list'] = TopicRelationship.objects.filter(
+        context['parent_list'] = TopicRelation.objects.filter(
             source=self.object.id
         ).filter(
-            relation_type=TopicRelationship.RelationType.CHILD_OF
+            relation_type=TopicRelation.RelationType.CHILD_OF
         )
-        context['child_list'] = TopicRelationship.objects.filter(
+        context['child_list'] = TopicRelation.objects.filter(
             target=self.object.id
         ).filter(
-            relation_type=TopicRelationship.RelationType.CHILD_OF
+            relation_type=TopicRelation.RelationType.CHILD_OF
         )
 
         return context
@@ -117,7 +117,7 @@ class UserDetailView(generic.DetailView):
 
 @login_required
 def mark_known(request, topic_id):
-    # MAKE A NEW TopicRelationship
+    # MAKE A NEW TopicRelation
     # then redirect to... user page? or back to topic
     # TODO: should use AJAX probably
     # print(f"topic id: {topic_id}")
@@ -218,8 +218,8 @@ def get_all_prereqs(topic_id, user_id):
             continue
         closed_set.add(curr_topic)
 
-        prereq_relations = TopicRelationship.objects.filter(target=curr_topic).filter(
-            relation_type=TopicRelationship.RelationType.PREREQ_OF
+        prereq_relations = TopicRelation.objects.filter(target=curr_topic).filter(
+            relation_type=TopicRelation.RelationType.PREREQ_OF
         )
         added_child = False
         for rel in prereq_relations:
@@ -232,8 +232,8 @@ def get_all_prereqs(topic_id, user_id):
             added_child = True
 
         # Add children topics too.
-        child_relations = TopicRelationship.objects.filter(target=curr_topic).filter(
-            relation_type=TopicRelationship.RelationType.CHILD_OF
+        child_relations = TopicRelation.objects.filter(target=curr_topic).filter(
+            relation_type=TopicRelation.RelationType.CHILD_OF
         )
         for rel in child_relations:
             if rel.source in known_topics:
@@ -279,8 +279,8 @@ def register_request(request):
 def edit_topic(request, topic_id=None):
     topic = Topic.objects.get(pk=topic_id)
 
-    relationships = list(TopicRelationship.objects.filter(source=topic_id).values())
-    relationships.extend(TopicRelationship.objects.filter(target=topic_id).values())
+    relationships = list(TopicRelation.objects.filter(source=topic_id).values())
+    relationships.extend(TopicRelation.objects.filter(target=topic_id).values())
 
     for rel in relationships:
         # can just get if don't do values()?
@@ -292,7 +292,7 @@ def edit_topic(request, topic_id=None):
     print(f"found {len(relationships)} rels")
     print(relationships)
 
-    rel_forms = TopicRelationshipFormSet(initial=relationships)
+    rel_forms = TopicRelationFormSet(initial=relationships)
     # print(rel_forms.as_table())
 
     # if not request.user:

@@ -20,7 +20,7 @@ class Topic(models.Model):
 
 
 # TODO: investigate performance of this vs. ManyToMany version.
-class TopicRelationship(models.Model):
+class TopicRelation(models.Model):
     source = models.ForeignKey(Topic, on_delete=models.CASCADE, related_name="source_topic")
     target = models.ForeignKey(Topic, on_delete=models.CASCADE, related_name="target_topic")
 
@@ -30,18 +30,18 @@ class TopicRelationship(models.Model):
         PREREQ_OF = 2
     relation_type = models.IntegerField(choices=RelationType.choices)
 
-    # Created by processing TopicRelVotes.
+    # Created by processing TopicRelationVotes.
     weight = models.FloatField(default=1)
 
     def __str__(self):
         return f"{self.source} -> {self.target}"
 
 
-# should point to topicrel? or no
-class TopicRelVote(models.Model):
+# should point to topicrelation? or no
+class TopicRelationVote(models.Model):
     source = models.ForeignKey(Topic, on_delete=models.CASCADE)
     target = models.ForeignKey(Topic, on_delete=models.CASCADE)
-    relation_type = models.IntegerField(choices=TopicRelationship.RelationType.choices)
+    relation_type = models.IntegerField(choices=TopicRelation.RelationType.choices)
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     source = models.CharField(max_length=200)
@@ -84,3 +84,15 @@ class Resource(models.Model):
 
     def __str__(self):
         return self.title
+
+
+# class ResourceRelation(models.Model):
+#     topic = models.ForeignKey(Topic, on_delete=models.CASCADE)
+
+#     title = models.CharField(max_length=200)
+#     author = models.CharField(max_length=200)
+#     link = models.CharField(max_length=200)
+#     votes = models.IntegerField(default=0)
+
+#     def __str__(self):
+#         return self.title

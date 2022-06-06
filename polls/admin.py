@@ -1,17 +1,16 @@
 from django.contrib import admin
 
-from .models import Topic, TopicRelationship, TopicRelVote, Resource, UserGoal, UserKnowledge
+from .models import Topic, TopicRelation, TopicRelationVote, Resource, UserGoal, UserKnowledge
 
 
-class TopicRelationshipAdmin(admin.ModelAdmin):
+class TopicRelationAdmin(admin.ModelAdmin):
     list_filter = ['relation_type']
     search_fields = ['source__title', 'target__title']
 
-admin.site.register(TopicRelationship, TopicRelationshipAdmin)
-
+admin.site.register(TopicRelation, TopicRelationAdmin)
 
 admin.site.register(Topic)
 admin.site.register(Resource)
-admin.site.register(TopicRelVote)
+admin.site.register(TopicRelationVote)
 admin.site.register(UserGoal)
 admin.site.register(UserKnowledge)

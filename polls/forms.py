@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 
-from .models import Topic, TopicRelationship
+from .models import Topic, TopicRelation
 
 # Create your forms here.
 
@@ -27,9 +27,9 @@ class TopicForm(forms.ModelForm):
         fields = ['title']
 
 
-class TopicRelationshipForm(forms.ModelForm):
+class TopicRelationForm(forms.ModelForm):
     class Meta:
-        model = TopicRelationship
+        model = TopicRelation
         fields = ['source', 'target', 'relation_type']
 
-TopicRelationshipFormSet = forms.formset_factory(TopicRelationshipForm)
+TopicRelationFormSet = forms.formset_factory(TopicRelationForm)
