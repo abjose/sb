@@ -24,6 +24,8 @@
     <p>No goals topics found.</p>
 {% endif %}
 
+<a href="{% url 'polls:topics' %}">Find new goals.</a>
+
 {% if request.user.is_authenticated %}
 <h3>Next Steps</h3>
 {% if next_steps %}
