@@ -72,27 +72,22 @@ class UserKnowledge(models.Model):
         return f"{self.user} knows {self.target}"
 
 
-# Want to be able to reference many topics?
-# Use Relationship instead?
 class Resource(models.Model):
-    topic = models.ForeignKey(Topic, on_delete=models.CASCADE)
-
     title = models.CharField(max_length=200)
     author = models.CharField(max_length=200)
     link = models.CharField(max_length=200)
-    votes = models.IntegerField(default=0)
+    # TODO: have comments purely for this resource? or only on ResourceRelation?
 
     def __str__(self):
         return self.title
 
 
-# class ResourceRelation(models.Model):
-#     topic = models.ForeignKey(Topic, on_delete=models.CASCADE)
+class ResourceRelation(models.Model):
+    resource = models.ForeignKey(Resource, on_delete=models.CASCADE)
+    topic = models.ForeignKey(Topic, on_delete=models.CASCADE)
 
-#     title = models.CharField(max_length=200)
-#     author = models.CharField(max_length=200)
-#     link = models.CharField(max_length=200)
-#     votes = models.IntegerField(default=0)
+    votes = models.IntegerField(default=0)
+    # TODO: comments?
 
-#     def __str__(self):
-#         return self.title
+    def __str__(self):
+        return f"({self.topic.title}) {self.resource.title}"

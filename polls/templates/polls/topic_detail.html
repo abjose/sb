@@ -78,14 +78,13 @@
         <th>Vote</th>
       {% endif %}
     </tr>
-    {% for resource in resource_list %}
+    {% for res in resource_list %}
       <tr>
-        <td>{{ resource.votes }}</td>
-        <!-- <td><a href="{% url 'polls:resource_detail' resource.id %}">{{ resource.title }}</a></td> -->
-        <td><a title="{{ resource.title }}" href="{{ resource.link }}">{{ resource.title|slice:"0:30" }}...</a></td>
-        <td>{{ resource.author }}</td>
+        <td>{{ res.votes }}</td>
+        <td><a title="{{ res.resource.title }}" href="{{ res.resource.link }}">{{ res.resource.title|slice:"0:30" }}...</a></td>
+        <td>{{ res.resource.author }}</td>
         {% if request.user.is_authenticated %}
-          <td><form name="vote" method="post" action="{% url 'polls:vote_for_resource' resource.id %}">
+          <td><form name="vote" method="post" action="{% url 'polls:vote_for_resource' res.id %}">
             {% csrf_token %}
             <input type="hidden" name="supporttype" />
             <input type="submit" value="+" />

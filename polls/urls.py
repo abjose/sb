@@ -16,7 +16,7 @@ urlpatterns = [
     path('topics/<int:topic_id>/remove_goal/', views.remove_goal, name='remove_goal'),
 
     path('resources/<int:pk>/', views.ResourceDetailView.as_view(), name='resource_detail'),
-    path('resources/vote/<int:resource_id>/', views.vote_for_resource, name='vote_for_resource'),
+    path('resources/vote/<int:resource_relation_id>/', views.vote_for_resource, name='vote_for_resource'),
 
     path('goals/<int:pk>/', views.GoalDetailView.as_view(), name='goal_detail'),
 

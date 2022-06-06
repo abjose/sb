@@ -12,7 +12,7 @@ from django.views import generic
 from random import choice
 
 from .forms import TopicForm, TopicRelationFormSet
-from .models import Topic, TopicRelation, Resource, UserGoal, UserKnowledge
+from .models import Topic, TopicRelation, Resource, ResourceRelation, UserGoal, UserKnowledge
 
 
 class IndexView(generic.ListView):
@@ -39,7 +39,7 @@ class TopicDetailView(generic.DetailView):
     def get_context_data(self, **kwargs):
         context = super(TopicDetailView, self).get_context_data(**kwargs)
 
-        context['resource_list'] = Resource.objects.filter(topic=self.object.id)
+        context['resource_list'] = ResourceRelation.objects.filter(topic=self.object.id)
 
         context['prereq_list'] = TopicRelation.objects.filter(
             target=self.object.id
@@ -191,11 +191,11 @@ def remove_goal(request, topic_id):
 
 
 @login_required
-def vote_for_resource(request, resource_id):
-    res = Resource.objects.get(pk=resource_id)
-    res.votes += 1
-    res.save()
-    return HttpResponseRedirect(reverse('polls:topic_detail', args=[res.topic.id]))
+def vote_for_resource(request, resource_relation_id):
+    rr = ResourceRelation.objects.get(pk=resource_relation_id)
+    rr.votes += 1
+    rr.save()
+    return HttpResponseRedirect(reverse('polls:topic_detail', args=[rr.topic.id]))
 
 
 # Return a list of all prereq topics for the given topic.
